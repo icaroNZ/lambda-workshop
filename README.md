@@ -7,6 +7,8 @@ This repository contains a simple project to describe the use of AWS lambda in C
 * [Docker installed](https://www.docker.com/community-edition)
 * [SAM Local installed](https://github.com/awslabs/aws-sam-cli)
 * [DotNet Core installed](https://www.microsoft.com/net/download)
+* [Microsoft Visual Studio installed](https://visualstudio.microsoft.com/downloads/)
+* Coolblue nuget url/s configured in Visual Studio
 
 
 # How to test with docker: 
