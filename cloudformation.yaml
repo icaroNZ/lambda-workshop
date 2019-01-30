@@ -1,0 +1,161 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: "Hello lambda workshop"
+Transform: AWS::Serverless-2016-10-31
+Parameters:
+  AppGroup:
+    Type: "String"
+    Default: "hello-lambda-workshop"
+    Description: "Hello lambda workshop"
+    AllowedPattern: "^[a-z0-9\\-]{1,30}$"
+  CloudFrontCertificateArn:
+    Type: "String"
+    Description: "The certificate used for CloudFront deployed in N.Virginia"
+  Region:
+    Description: "Specify the region"
+    Type: "String"
+    Default: "eu-west-1"
+    AllowedValues:
+      - "eu-west-1"
+  Environment:
+    Type: "String"
+    AllowedValues:
+      - "testing"
+      - "acceptance"
+      - "production"
+    Default: "testing"
+    ConstraintDescription: "Must be one of the values from the list."
+    Description: "Environment in which resources are deployed."
+Mappings:
+  Environment:
+    testing:
+      OracleCidr: "192.168.112.32/28"
+      OracleConnectionString: "User Id={OracleUsername};Password={OraclePassword};Server=nlam01-devora-scan.servers.coolblue.nl;Direct=True;Sid=SPAWN2;Port=1521;License Key={LicenseKey}"
+      OracleUsername: "WORKSHOPUSR"
+      OraclePassword: "AQICAHiNOBEuni11Hz0dSHsiY7U5P7Dm7sjuhtV0LFLYcz6mpgGCKKnmKfiZ39EUwYafmGyGAAAAZDBiBgkqhkiG9w0BBwagVTBTAgEAME4GCSqGSIb3DQEHATAeBglghkgBZQMEAS4wEQQM5azqOUWVkc21AOX8AgEQgCGsKsQeVQ9kQFJknr+dUTngUnQOlrtj8DnCix2bCmokNIU="
+      LicenseKey: "AQICAHiNOBEuni11Hz0dSHsiY7U5P7Dm7sjuhtV0LFLYcz6mpgF7EiBXAvzQL/Ewi01ap1yAAAABgDCCAXwGCSqGSIb3DQEHBqCCAW0wggFpAgEAMIIBYgYJKoZIhvcNAQcBMB4GCWCGSAFlAwQBLjARBAwnViTY6Q+KMtjiBr4CARCAggEzhTFG9vjOYgFZP1gz5Oi7rXtJllJn6dEo2xAde/kpvF6mghfoiRhDgGR5+JaKe60N37feA2sw7vwWniS0QIfaxoYJoCkjbaRZFuBhTgFIgS2SSRXq9UadRU2cde2OplH1rOJGrCE17FCsiJdhKClq48kqSmr07I38Hb5u3Mi0SMvTDHDbLIlxwpKTEW54jtQp8mM501A89VUH0nwe4LJfpOh3M/WQ0d7r+yTpZfMXJfiLJCjjQ8qwkkIIB4PPyM11vHKoeU2GorbteXSTYfvYh87g2ykVdAtyQO6Uk4CXY1bNQHfs9/vfhckEimEOc5zOjufgzTDW3ybfUcmRCpN3YGTSWuDHv7u4xHuF0HPjhApsS8BkDWFkk6sc6cH43tMxIyydLQslXf7H2zOqO1MoD/+GRw=="
+    acceptance:
+      OracleCidr: "192.168.112.32/28"
+      OracleConnectionString: "User Id={OracleUsername};Password={OraclePassword};Server=nlam01-devora-scan.servers.coolblue.nl;Direct=True;Sid=SPAWN2;Port=1521;License Key={LicenseKey}"
+      OracleUsername: "WORKSHOPUSR"
+      OraclePassword: "AQICAHgIGDCLvYzhYembg689/ncsnVufvEFfhjnNoE2jbZzDgAH0OiU06y0RWoTjniW+AHiKAAAAZDBiBgkqhkiG9w0BBwagVTBTAgEAME4GCSqGSIb3DQEHATAeBglghkgBZQMEAS4wEQQMG5hRNpo4OZ6s55wjAgEQgCF+6E2w1Px59lJ6Yuj3+9pLJ9TOyrrpkXfcn+UdQEAF+Vo="
+      LicenseKey: "AQICAHgIGDCLvYzhYembg689/ncsnVufvEFfhjnNoE2jbZzDgAFk6NeLRjrrTNXKjgZzbFgGAAABgDCCAXwGCSqGSIb3DQEHBqCCAW0wggFpAgEAMIIBYgYJKoZIhvcNAQcBMB4GCWCGSAFlAwQBLjARBAysklVf8nc4hmWVgDUCARCAggEzNniMOr5Vtny+sJbAP37v4KlkgDfAd8wmq5K6iLiWRQV/9TX8JssKOS7m6oUDJyONxiD3i/0VVsXrDnvkB2xcR+uZm+8JtsKFPsza2sxHQbdHEtr9PIQh7us6wHSIPER9mMT6afISrNEvGUKtEX3qVYfhU+pq0I4QzqISfjzueOGxGzjy1ehzLRSxaxpHG2aKaN9FFR0VB8YjMN7krGQKMx82b5EuXgSYKhvfvJTW8Sb05AM0pbTvGkO5eZ4Dpe6gZOWzVSjcoICitOfaXZE9g46oMufHRKkxqU2U3G7U15NztAwxa75kmrPACeypL0cZVG5+KNo+kBJ0CxfuTwUuc4V2VMGqBwhxZRuLXjfiBQntsgDokbHsTIMRJRqtcXqz+RlKPLiTs0KKG36hvW13vIUXCg=="
+    production:
+      OracleCidr: "192.168.67.16/28"
+      OracleConnectionString: "User Id={OracleUsername};Password={OraclePassword};Server=nlam01-prdora-scan.servers.coolblue.nl;Direct=True;Service Name=VANPRD_SRV;Port=1521;License Key={LicenseKey}"
+      OracleUsername: ""
+      OraclePassword: ""
+      LicenseKey: ""
+Resources:
+    ApiKey:
+      Type: "AWS::ApiGateway::ApiKey"
+      Properties:
+        Enabled: false
+        StageKeys:
+          -
+            RestApiId: !Ref "ServerlessApi"
+            StageName: !Ref "ServerlessApiStage" # this resource is created by CloudFormation transform
+    DomainName:
+      Type: AWS::ApiGateway::DomainName
+      Properties:
+        CertificateArn: !Ref "CloudFrontCertificateArn"
+        DomainName: !Sub "${AppGroup}.${Region}.coolblue-${Environment}.eu"
+    BasePathMapping:
+      Type: "AWS::ApiGateway::BasePathMapping"
+      Properties:
+        DomainName: !Ref "DomainName"
+        RestApiId: !Ref "ServerlessApi"
+        Stage: !Ref "ServerlessApiStage"
+    HelloLambdaFunction:
+      Type: AWS::Serverless::Function # More info about Function Resource: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunction
+      Properties:
+        CodeUri: ./artifacts/HelloLambda.zip
+        FunctionName: !Sub "${Environment}-adyen-payment-notification"
+        Handler: HelloLambda::HelloLambda.Function::FunctionHandler
+        Runtime: dotnetcore2.0
+        VpcConfig:
+          SecurityGroupIds:
+            - !Ref "PrivateSecurityGroup"
+          SubnetIds: !Split [ ",", !ImportValue "infrastructure-lambda-subnets"]
+        Role: !ImportValue "iam-lambda-basic-execution-role-arn"
+        Tags:
+          Name: !Sub "${AWS::StackName}"
+          AppGroup: !Sub "${AWS::StackName}"
+          AppRole: "function"
+          Environment: !Ref "Environment"
+        Environment:
+          Variables:
+            ORACLE_CONNECTIONSTRING: !FindInMap ["Environment", !Ref "Environment", "OracleConnectionString"]
+            ORACLE_USER: !FindInMap ["Environment", !Ref "Environment", "OracleUsername"]
+            ORACLE_PASSWORD: !FindInMap ["Environment", !Ref "Environment", "OraclePassword"]
+            LICENSE_KEY: !FindInMap ["Environment", !Ref "Environment", "LicenseKey"]
+        Timeout: 300
+        Events:
+          GetApi:
+            Type: "Api"
+            Properties:
+              Method: "POST"
+              Path: "/callback"
+              RestApiId: !Ref "ServerlessApi"
+    PrivateSecurityGroup:
+      Type: "AWS::EC2::SecurityGroup"
+      Properties:
+        GroupDescription: "Allowed incoming/outgoing traffic to/from the internal resources"
+        SecurityGroupEgress:
+          - CidrIp: !FindInMap ["Environment", !Ref "Environment", "OracleCidr"]
+            FromPort: 1521
+            ToPort: 1521
+            IpProtocol: "tcp"
+          - CidrIp: "0.0.0.0/0"
+            FromPort: 443
+            ToPort: 443
+            IpProtocol: "tcp"
+        VpcId: !ImportValue "infrastructure-vpc"
+        Tags:
+          - Key: "Name"
+            Value: !Sub "${AWS::StackName}-private"
+          - Key: "AppRole"
+            Value: "security-group"
+          - Key: "Environment"
+            Value: !Ref "Environment"
+    ServerlessApi:
+      Type: "AWS::Serverless::Api"
+      Name: "hello-lambda-workshop-api"
+      Properties:
+        StageName: !Ref "Environment"
+        DefinitionBody:
+          swagger: "2.0"
+          info:
+            title: !Ref "AWS::StackName"
+            version: "2018-01-11-11:40"
+          basePath: !Sub "/${Environment}"
+          schemes:
+            - "https"
+          paths:
+            /callback:
+              post:
+                consumes:
+                - "application/json"
+                produces:
+                - "application/json"
+                parameters:
+                - in: "body"
+                  name: "IncomingNotification"
+                responses:
+                  '200':
+                    description: "200 response"
+                x-amazon-apigateway-integration:
+                  type: "aws_proxy"
+                  uri: !Sub "arn:aws:apigateway:${Region}:lambda:path/2015-03-31/functions/${HelloLambdaFunction.Arn}/invocations"
+                  httpMethod: POST
+                  responses:
+                    "default":
+                      statusCode: "200"                  
+    ServerlessApiRoute53RecordSet:
+      Type: "AWS::Route53::RecordSet"
+      Properties:
+        AliasTarget:
+          DNSName: !GetAtt "DomainName.DistributionDomainName"
+          HostedZoneId: "Z2FDTNDATAQYW2"
+        HostedZoneId: !ImportValue "dns-coolblue-public-hosted-zone-id"
+        Name: !Sub "${AppGroup}.${Region}.coolblue-${Environment}.eu"
+        Type: "A"        
