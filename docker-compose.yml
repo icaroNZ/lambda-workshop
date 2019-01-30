@@ -1,0 +1,17 @@
+version: '2'
+services:
+  workshop-oracle:
+    container_name: workshop-oracle
+    image: workshop-oracle
+    build: ./docker/workshop-oracle/
+    environment:
+      - ORACLE_ALLOW_REMOTE=true
+    ports:
+      - 1521:1521
+    networks:
+      - privatenetwork
+ 
+networks: 
+  privatenetwork:
+    external: 
+      name: workshop-network
